@@ -27,7 +27,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   create_release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjobs_idoutputs
     # Map a step output to a job output
     outputs:
