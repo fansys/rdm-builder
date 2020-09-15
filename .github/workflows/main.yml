@@ -7,7 +7,6 @@ name: CI for redis desktop manager
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
-  workflow_dispatch:
   push:
     branches: [ master ]
     paths-ignore: 
@@ -20,9 +19,9 @@ on:
       - 'LICENSE'
 
 env:
-  RDM_REF: 2020.2
-  VERSION: 2020.2.0
-  PYTHON_EMBEDDED_VERSION: 3.7.8
+  RDM_REF: 2020.3
+  VERSION: 2020.3.0
+  PYTHON_EMBEDDED_VERSION: 3.7.9
   OSX_MIN_VERSION: 10.13.0
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -38,15 +37,18 @@ jobs:
       #   uses: actions/checkout@v2
       #   with:
       #     fetch-depth: 0
-
+      - name: Set Environment Variables
+        run: |
+          timestamp=`date '+%Y%m%d'`
+          echo '::set-env name=TIMESTAMP::'$timestamp
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ env.VERSION }}-${{ github.run_id }}
-          release_name: v${{ env.VERSION }}-${{ github.run_id }}
+          tag_name: ${{ env.VERSION }}-${{ env.TIMESTAMP }}
+          release_name: v${{ env.VERSION }}-${{ env.TIMESTAMP }}
           body: |
             ${{ env.VERSION }}
           draft: false
@@ -88,12 +90,10 @@ jobs:
       run: |
         cd rdm/3rdparty/qredisclient/3rdparty/hiredis
         git apply ../hiredis-win.patch
-
     - name: install zlib
       run: |
         cd rdm/3rdparty
         nuget install zlib-msvc14-x64 -Version 1.2.11.7795
-
 #    # install python3  
 #    - name: install Python3
 #      uses: actions/setup-python@v2
@@ -104,13 +104,12 @@ jobs:
     # install python3
     - name: install python37
       shell: cmd
-      run: mklink /d C:\Python37-x64 C:\hostedtoolcache\windows\python\3.7.8\x64
+      run: mklink /d C:\Python37-x64 C:\hostedtoolcache\windows\python\${{ env.PYTHON_EMBEDDED_VERSION }}\x64
 
     # pip install
     - name: pip install
       shell: cmd
       run: |
-        dir C:\hostedtoolcache\windows\python
         cd rdm\build\windows\installer\resources
         xcopy %GITHUB_WORKSPACE%\rdm\src\py . /s /i
         mkdir Lib\site-packages
@@ -120,7 +119,6 @@ jobs:
         forfiles /p "." /s /m __pycache__ /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
         forfiles /p "." /s /m *.dist-info /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
         forfiles /p "." /s /m *.egg-info /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
-
     # https://doc.qt.io/qt-5/linguist-manager.html
     # lupdate rdm.pro
     - name: translations
@@ -130,7 +128,6 @@ jobs:
         lupdate rdm.pro
         lrelease -verbose rdm.pro
         xcopy resources\translations\*.qm ..\build\windows\installer\resources\translations /s /i
-
     # Runs a single command using the runners shell
     - name: build
       shell: cmd
@@ -142,7 +139,6 @@ jobs:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" %vc_arch%
         qmake rdm.pro CONFIG-=debug VERSION=${{ env.VERSION }}
         nmake
-
     # 缺少python37.dll
     # fix formatter error, unicodedata _bz2
     - name: add python37.dll
@@ -154,7 +150,6 @@ jobs:
         wget "https://www.python.org/ftp/python/${{ env.PYTHON_EMBEDDED_VERSION }}/python-${{ env.PYTHON_EMBEDDED_VERSION }}-embed-amd64.zip" -outfile "python-embed.zip"
         7z.exe x python-embed.zip python37.zip python3.dll python37.dll unicodedata.pyd _bz2.pyd
         del python-embed.zip
-
     # windeployqt
     # https://doc.qt.io/qt-5/windows-deployment.html
     # windeployqt.exe --force --qmldir ${{ env.QML2_IMPORT_PATH }} rdm.exe
@@ -169,7 +164,6 @@ jobs:
         cd build\windows\installer\resources
         windeployqt.exe --no-angle --no-opengl-sw --no-compiler-runtime --no-translations --release --force --qmldir ../../../../src/qml rdm.exe
         makensis.exe /V1 /DVERSION=${{ env.VERSION }} ../installer.nsi
-
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1.0.2
@@ -219,13 +213,11 @@ jobs:
       run: |
         cd rdm/3rdparty/qredisclient/3rdparty/hiredis
         git apply ../hiredis-win.patch
-
     - name: install zlib
       run: |
         cd rdm/3rdparty
-        nuget install zlib-msvc14-x86 -Version 1.2.11.7795 
+        nuget install zlib-msvc14-x64 -Version 1.2.11.7795
         mv zlib-msvc14-x86.1.2.11.7795 zlib-msvc14-x64.1.2.11.7795
-
 #    # install python3  
 #    - name: install Python3
 #      uses: actions/setup-python@v2
@@ -236,13 +228,12 @@ jobs:
     # install python3
     - name: install python37
       shell: cmd
-      run: mklink /d C:\Python37-x64 C:\hostedtoolcache\windows\python\3.7.8\x86
+      run: mklink /d C:\Python37-x64 C:\hostedtoolcache\windows\python\${{ env.PYTHON_EMBEDDED_VERSION }}\x86
 
     # pip install
     - name: pip install
       shell: cmd
       run: |
-        dir C:\hostedtoolcache\windows\python
         cd rdm\build\windows\installer\resources
         xcopy %GITHUB_WORKSPACE%\rdm\src\py . /s /i
         mkdir Lib\site-packages
@@ -252,7 +243,6 @@ jobs:
         forfiles /p "." /s /m __pycache__ /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
         forfiles /p "." /s /m *.dist-info /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
         forfiles /p "." /s /m *.egg-info /c "cmd /c if @isdir==TRUE rd /s /q @file 2>nul" 2>nul | exit /b 0
-
     # https://doc.qt.io/qt-5/linguist-manager.html
     # lupdate rdm.pro
     - name: translations
@@ -262,7 +252,6 @@ jobs:
         lupdate rdm.pro
         lrelease -verbose rdm.pro
         xcopy resources\translations\*.qm ..\build\windows\installer\resources\translations /s /i
-
     # Runs a single command using the runners shell
     - name: build
       shell: cmd
@@ -274,7 +263,6 @@ jobs:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" %vc_arch%
         qmake rdm.pro CONFIG-=debug VERSION=${{ env.VERSION }}
         nmake
-
     # 缺少python37.dll
     # fix formatter error, unicodedata _bz2
     - name: add python37.dll
@@ -286,7 +274,6 @@ jobs:
         wget "https://www.python.org/ftp/python/${{ env.PYTHON_EMBEDDED_VERSION }}/python-${{ env.PYTHON_EMBEDDED_VERSION }}-embed-win32.zip" -outfile "python-embed.zip"
         7z.exe x python-embed.zip python37.zip python3.dll python37.dll unicodedata.pyd _bz2.pyd
         del python-embed.zip
-
     # windeployqt
     # https://doc.qt.io/qt-5/windows-deployment.html
     # windeployqt.exe --force --qmldir ${{ env.QML2_IMPORT_PATH }} rdm.exe
@@ -301,7 +288,6 @@ jobs:
         cd build\windows\installer\resources
         windeployqt.exe --no-angle --no-opengl-sw --no-compiler-runtime --no-translations --release --force --qmldir ../../../../src/qml rdm.exe
         makensis.exe /V1 /DVERSION=${{ env.VERSION }} ../installer.nsi
-
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1.0.2
@@ -327,7 +313,7 @@ jobs:
         path: rdm
         submodules: 'recursive'
         ref: ${{ env.RDM_REF }}
-#        ref: 2020
+        # ref: 2020
 
     # install QT   
     - name: install QT
@@ -345,7 +331,6 @@ jobs:
     
     - name: setup python
       run: |
-        ls /usr/local/opt
         brew unlink python@3.8
         brew install python@3.7
         brew link --force python@3.7
@@ -370,13 +355,11 @@ jobs:
         sudo find . -name "__pycache__" | sudo xargs rm -rf
         sudo find . -name "*.dist-info" | sudo xargs rm -rf
         sudo find . -name "*.egg-info" | sudo xargs rm -rf
-
     - name: release translations
       run: |
         cd rdm/src
         lupdate rdm.pro
         lrelease -verbose rdm.pro
-
     # brew install tree && tree -a
     # 去掉initUpdater不然报Please download new version of Redis Desktop Manager，不能使用
     # sed -i '.back' 's/initUpdater();/\/\/initUpdater();/g' ./app/app.cpp
@@ -391,13 +374,11 @@ jobs:
         cd rdm/src
         qmake rdm.pro CONFIG-=debug VERSION=${{ env.VERSION }}
         make -s -j 8
-
     - name: copy translations
       run: |
         cd rdm/src
         mkdir ../bin/osx/release/Redis\ Desktop\ Manager.app/Contents/translations
         cp -f ./resources/translations/*.qm ../bin/osx/release/Redis\ Desktop\ Manager.app/Contents/translations
-
     - name: package
       id: package
       run: |
@@ -406,7 +387,6 @@ jobs:
         cp -Rf py ./Redis\ Desktop\ Manager.app/Contents/Resources/
         otool -L ./Redis\ Desktop\ Manager.app/Contents/MacOS/Redis\ Desktop\ Manager
         macdeployqt ./Redis\ Desktop\ Manager.app -qmldir=../../../src/qml -always-overwrite -dmg
-
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1.0.2
