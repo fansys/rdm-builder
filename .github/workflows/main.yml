@@ -31,7 +31,7 @@ jobs:
       #     fetch-depth: 0
       - name: Set Environment Variables
         run: |
-          timestamp=`date '+%Y%m%d%H%i%s'`
+          timestamp=`date '+%Y%m%d'`
           echo '::set-env name=TIMESTAMP::'$timestamp
       - name: Create Release
         id: create_release
@@ -326,13 +326,13 @@ jobs:
         brew unlink python@3.8
         brew install python@3.7
         brew link --force python@3.7
-        PYTHON_HOME=/usr/local/opt/python@3.7
-        ln -s $PYTHON_HOME/Frameworks/Python.framework $PYTHON_HOME/lib/Python.framework
-        rm -rf $PYTHON_HOME/lib/Python.framework/Headers/
-        rm -rf $PYTHON_HOME/lib/Python.framework/Resources/
-        rm -rf $PYTHON_HOME/lib/Python.framework/bin/
-        rm -rf $PYTHON_HOME/lib/Python.framework/include/
-        rm -rf $PYTHON_HOME/lib/Python.framework/share/
+        # PYTHON_HOME=/usr/local/opt/python@3.7
+        # ln -s $PYTHON_HOME/Frameworks/Python.framework $PYTHON_HOME/lib/Python.framework
+        # rm -rf $PYTHON_HOME/lib/Python.framework/Headers/
+        # rm -rf $PYTHON_HOME/lib/Python.framework/Resources/
+        # rm -rf $PYTHON_HOME/lib/Python.framework/bin/
+        # rm -rf $PYTHON_HOME/lib/Python.framework/include/
+        # rm -rf $PYTHON_HOME/lib/Python.framework/share/
     
     # 使用私有库,egg-links时-t不能同时使用，--user解决权限问题
     # https://github.com/UnitedIncome/serverless-python-requirements/issues/240
