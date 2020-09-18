@@ -31,7 +31,7 @@ jobs:
       #     fetch-depth: 0
       - name: Set Environment Variables
         run: |
-          timestamp=`date '+%Y%m%d'`
+          timestamp=`date '+%Y%m%d%H%i%s'`
           echo '::set-env name=TIMESTAMP::'$timestamp
       - name: Create Release
         id: create_release
@@ -326,6 +326,16 @@ jobs:
         brew unlink python@3.8
         brew install python@3.7
         brew link --force python@3.7
+        echo 'ls -l /usr/local/opt |grep python'
+        ls -l /usr/local/opt |grep python
+        echo 'ls -l /usr/local/opt/python@3.7'
+        ls -l /usr/local/opt/python@3.7
+        echo 'ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/'
+        ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/
+        echo 'ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/3.7'
+        ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/3.7
+        echo 'ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/3.7/Python'
+        ls -l /usr/local/opt/python@3.7/lib/Python.framework/Versions/3.7/Python
     
     # 使用私有库,egg-links时-t不能同时使用，--user解决权限问题
     # https://github.com/UnitedIncome/serverless-python-requirements/issues/240
