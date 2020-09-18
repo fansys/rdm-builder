@@ -75,7 +75,7 @@ jobs:
     - name: install QT
       uses: jurplel/install-qt-action@v2.7.2
       with: 
-        version: '5.13.2'
+        version: '5.14.2'
         modules: 'qtcharts'
 
     - name : fix compilation
@@ -197,7 +197,7 @@ jobs:
     - name: install QT
       uses: jurplel/install-qt-action@v2.7.2
       with: 
-        version: '5.13.2'
+        version: '5.14.2'
         modules: 'qtcharts'
         arch: 'win32_msvc2017'
 
@@ -311,7 +311,7 @@ jobs:
     - name: install QT
       uses: jurplel/install-qt-action@v2.7.2
       with: 
-        version: '5.13.2'
+        version: '5.14.2'
         modules: 'qtcharts'
     
     - name: copy info.plist
