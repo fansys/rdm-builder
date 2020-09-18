@@ -10,8 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  # RDM_REF: 2020.3
-  RDM_REF: 2020
+  RDM_REF: 2020.3
   VERSION: 2020.3.0
   PYTHON_EMBEDDED_VERSION: 3.7.9
   OSX_MIN_VERSION: 10.13.0
