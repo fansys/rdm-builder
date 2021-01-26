@@ -92,6 +92,12 @@ jobs:
         version: '5.15.1'
         modules: 'qtcharts'
 
+    - name: fix window display
+      shell: powershell
+      run: |
+        cd rdm/src/qml
+        (type 'WelcomeTab.qml' -Encoding utf8) -replace ('RDM.dev','RDM')| out-file -Encoding utf8 WelcomeTab.qml
+
     - name : fix compilation
       run: |
         cd rdm/3rdparty/qredisclient/3rdparty/hiredis
@@ -228,7 +234,12 @@ jobs:
     - name: copy info.plist
       run: |
         cd rdm
-        cd ./src && cp ./resources/Info.plist.sample ./resources/Info.plist
+        cd ./src
+        cp ./resources/Info.plist.sample ./resources/Info.plist
+        sed -i '_bak' "s/0.0.0/${{ env.VERSION }}/g" ./resources/Info.plist
+        sed -i '_bak' 's/RDM.dev/RDM/g' ./qml/WelcomeTab.qml
+        cat ./resources/Info.plist
+        cat ./qml/WelcomeTab.qml
     
     - name: setup python
       run: |
